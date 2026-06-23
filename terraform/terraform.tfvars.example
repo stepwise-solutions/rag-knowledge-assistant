@@ -1,0 +1,13 @@
+# Copy to terraform.tfvars (gitignored) and set your subscription ID locally.
+# Do not commit terraform.tfvars.
+
+subscription_id = "00000000-0000-0000-0000-000000000000"
+
+openai_sku = "S0"
+search_sku = "standard"
+
+tags = {
+  owner       = "platform-team"
+  cost_center = "engineering"
+  workload    = "rag-knowledge-assistant"
+}
