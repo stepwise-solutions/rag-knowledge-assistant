@@ -4,7 +4,7 @@
 subscription_id = "00000000-0000-0000-0000-000000000000"
 
 openai_sku = "S0"
-search_sku = "standard"
+search_sku = "free"
 
 tags = {
   owner       = "platform-team"

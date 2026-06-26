@@ -14,7 +14,7 @@ variable "location" {
 }
 
 variable "sku" {
-  description = "Search service SKU (standard recommended for production)."
+  description = "Search service SKU (free, basic, standard, etc.)."
   type        = string
 }
 

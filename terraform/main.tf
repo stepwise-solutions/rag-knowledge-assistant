@@ -42,7 +42,7 @@ module "openai" {
   embedding_deployment_capacity = var.embedding_deployment_capacity
 }
 
-# Azure AI Search service with semantic ranking enabled.
+# Azure AI Search service (free tier by default for dev cost control).
 module "search" {
   source = "./modules/search"
 

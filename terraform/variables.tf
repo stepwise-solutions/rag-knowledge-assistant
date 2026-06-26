@@ -29,9 +29,9 @@ variable "openai_sku" {
 }
 
 variable "search_sku" {
-  description = "SKU for Azure AI Search (use standard for production RAG workloads)."
+  description = "SKU for Azure AI Search (free for dev; use standard for production RAG workloads)."
   type        = string
-  default     = "standard"
+  default     = "free"
 }
 
 variable "tags" {
