@@ -1,0 +1,7 @@
+[
+  {
+    "question": "What is the purpose of this knowledge assistant?",
+    "expected_answer": "It answers questions using retrieved documents and Azure OpenAI.",
+    "expected_sources": ["README.md"]
+  }
+]
