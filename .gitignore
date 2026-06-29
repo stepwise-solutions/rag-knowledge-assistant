@@ -20,3 +20,5 @@ build/
 # Data (keep structure, ignore uploaded docs)
 data/raw_docs/*
 !data/raw_docs/.gitkeep
+data/loaded_docs/*
+!data/loaded_docs/.gitkeep
