@@ -25,14 +25,13 @@ def health() -> dict[str, str]:
 
 @app.post("/query", response_model=QueryResponse)
 def query(request: QueryRequest) -> QueryResponse:
+    from app.generation.generator import create_generator
     from app.retrieval.retriever import create_retriever
-    from app.rag.generator import generate_answer
 
-    results = create_retriever().retrieve(request.question)
-    chunks = [result.model_dump() for result in results]
-    answer = generate_answer(request.question, chunks)
+    retrieval_results = create_retriever().retrieve(request.question)
+    answer = create_generator().generate_answer(request.question, retrieval_results)
 
     return QueryResponse(
         answer=answer,
-        sources=[chunk.get("source", "") for chunk in chunks],
+        sources=[result.source for result in retrieval_results],
     )
