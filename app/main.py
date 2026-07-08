@@ -25,12 +25,11 @@ def health() -> dict[str, str]:
 
 @app.post("/query", response_model=QueryResponse)
 def query(request: QueryRequest) -> QueryResponse:
-    from app.rag.query_rewriter import rewrite_query
-    from app.rag.retriever import retrieve
+    from app.retrieval.retriever import create_retriever
     from app.rag.generator import generate_answer
 
-    rewritten = rewrite_query(request.question)
-    chunks = retrieve(rewritten)
+    results = create_retriever().retrieve(request.question)
+    chunks = [result.model_dump() for result in results]
     answer = generate_answer(request.question, chunks)
 
     return QueryResponse(

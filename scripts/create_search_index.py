@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Create the Azure AI Search index used by this RAG app.
 
-Schema matches app/ingestion/indexer.py and app/rag/retriever.py:
+Schema matches app/ingestion/indexer.py and app/retrieval/search_service.py:
   - id             unique identifier for the chunk
   - chunk_id       chunk identifier within the source document
   - source         originating file path

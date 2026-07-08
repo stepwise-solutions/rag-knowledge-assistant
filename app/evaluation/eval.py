@@ -4,8 +4,7 @@ import json
 from pathlib import Path
 
 from app.rag.generator import generate_answer
-from app.rag.query_rewriter import rewrite_query
-from app.rag.retriever import retrieve
+from app.retrieval.retriever import create_retriever
 
 
 def load_dataset(path: str | Path | None = None) -> list[dict]:
@@ -18,10 +17,12 @@ def run_evaluation(dataset: list[dict] | None = None) -> list[dict]:
     examples = dataset or load_dataset()
     results: list[dict] = []
 
+    retriever = create_retriever()
+
     for example in examples:
         question = example["question"]
-        rewritten = rewrite_query(question)
-        chunks = retrieve(rewritten)
+        results = retriever.retrieve(question)
+        chunks = [result.model_dump() for result in results]
         answer = generate_answer(question, chunks)
 
         results.append(

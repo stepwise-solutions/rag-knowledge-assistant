@@ -9,7 +9,7 @@ from pathlib import Path
 from azure.core.credentials import AzureKeyCredential
 from azure.search.documents import SearchClient
 
-from app.rag.embedding_service import EmbeddingService
+from app.embeddings.embedding_service import EmbeddingService
 
 
 @dataclass
