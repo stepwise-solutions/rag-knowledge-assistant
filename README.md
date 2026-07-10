@@ -28,8 +28,9 @@ rag-knowledge-assistant/
 │   ├── raw_docs/               # Documents waiting to be ingested (.pdf, .txt, .md)
 │   └── loaded_docs/            # Successfully indexed documents (moved automatically)
 ├── scripts/
-│   ├── create_search_index.py  # Create the Azure AI Search vector index
-│   └── test_retrieval.py       # Manual end-to-end RAG test script
+│   ├── create_search_index.py
+│   └── test_retrieval.py
+├── frontend/                   # React chat UI (Vite + TypeScript)
 ├── docker/
 ├── terraform/                  # Azure infrastructure (OpenAI, Search, Storage)
 ├── .env                        # Local environment variables (not committed)
@@ -40,63 +41,142 @@ rag-knowledge-assistant/
 ## Prerequisites
 
 - Python 3.12+
+- [Node.js](https://nodejs.org/) 18+ (for the chat UI)
 - Azure resources provisioned via [terraform/README.md](terraform/README.md)
-- Azure OpenAI, AI Search, and Storage credentials
+- Azure OpenAI and AI Search credentials
 
-## Setup (Windows)
+## Run locally (Windows)
 
-1. **Clone the repository** and open PowerShell in the project root:
+### 1. One-time setup
 
-   ```powershell
-   cd C:\path\to\rag-knowledge-assistant
-   ```
+Open PowerShell in the project root:
 
-2. **Create and activate a virtual environment:**
+```powershell
+cd C:\path\to\rag-knowledge-assistant
+```
 
-   ```powershell
-   python -m venv .venv
-   .venv\Scripts\Activate.ps1
-   ```
+Create and activate a Python virtual environment:
 
-   If script execution is blocked, run once:
+```powershell
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+```
 
-   ```powershell
-   Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
-   ```
+If script execution is blocked:
 
-3. **Install dependencies:**
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+```
 
-   ```powershell
-   pip install -r requirements.txt
-   ```
+Install Python dependencies:
 
-4. **Configure environment variables** — create a `.env` file in the project root with your Azure credentials (values align with Terraform outputs):
+```powershell
+pip install -r requirements.txt
+```
 
-   ```env
-   # Azure OpenAI
-   AZURE_OPENAI_ENDPOINT=https://your-openai.openai.azure.com/
-   AZURE_OPENAI_API_KEY=your-key
-   AZURE_OPENAI_GPT_DEPLOYMENT=gpt-4.1-mini
-   AZURE_OPENAI_EMBEDDING_DEPLOYMENT=text-embedding-3-large
-   AZURE_OPENAI_API_VERSION=2024-06-01
+Create a `.env` file in the project root with your Azure credentials (values align with [Terraform outputs](terraform/README.md#connect-to-the-application)):
 
-   # Azure AI Search
-   AZURE_SEARCH_ENDPOINT=https://your-search.search.windows.net
-   AZURE_SEARCH_API_KEY=your-key
-   AZURE_SEARCH_INDEX_NAME=rag-documents
+```env
+# Azure OpenAI
+AZURE_OPENAI_ENDPOINT=https://your-openai.openai.azure.com/
+AZURE_OPENAI_API_KEY=your-key
+AZURE_OPENAI_GPT_DEPLOYMENT=gpt-4.1-mini
+AZURE_OPENAI_EMBEDDING_DEPLOYMENT=text-embedding-3-large
+AZURE_OPENAI_API_VERSION=2024-06-01
 
-   # Application
-   RAW_DOCS_PATH=data/raw_docs
-   LOADED_DOCS_PATH=data/loaded_docs
-   ```
+# Azure AI Search
+AZURE_SEARCH_ENDPOINT=https://your-search.search.windows.net
+AZURE_SEARCH_API_KEY=your-key
+AZURE_SEARCH_INDEX_NAME=rag-documents
 
-5. **Create the Azure AI Search index** (required once before first ingestion):
+# Application
+RAW_DOCS_PATH=data/raw_docs
+LOADED_DOCS_PATH=data/loaded_docs
+```
 
-   ```powershell
-   python scripts/create_search_index.py
-   ```
+Create the Azure AI Search index (once per environment):
 
-   The Free tier supports vector search for development and small workloads, with limits.
+```powershell
+python scripts/create_search_index.py
+```
+
+Install frontend dependencies (once):
+
+```powershell
+cd frontend
+Copy-Item .env.example .env
+npm install
+cd ..
+```
+
+The frontend `.env` should contain:
+
+```env
+VITE_API_URL=http://localhost:8000
+```
+
+### 2. Ingest documents (first time, or when adding new files)
+
+Copy PDFs (or `.txt` / `.md` files) into `data/raw_docs/`, then from the project root:
+
+```powershell
+python -m app.ingestion.ingest
+```
+
+Successfully indexed files are moved to `data/loaded_docs/`. See [Ingest PDF Documents](#ingest-pdf-documents) for details.
+
+### 3. Start the application
+
+Use **two terminals**, both with the Python venv activated for the backend.
+
+**Terminal 1 — Backend API:**
+
+```powershell
+cd C:\path\to\rag-knowledge-assistant
+.venv\Scripts\Activate.ps1
+uvicorn app.main:app --reload
+```
+
+API available at `http://localhost:8000`  
+Health check: `GET http://localhost:8000/health`
+
+**Terminal 2 — Chat UI:**
+
+```powershell
+cd C:\path\to\rag-knowledge-assistant\frontend
+npm run dev
+```
+
+Open `http://localhost:5173` in your browser, type a question, and click **Send**.
+
+### 4. Verify (optional)
+
+**Browser:** Ask a question in the chat UI at `http://localhost:5173`.
+
+**CLI:** Run the interactive test script from the project root:
+
+```powershell
+python scripts/test_retrieval.py
+```
+
+**API directly:**
+
+```powershell
+curl -X POST http://localhost:8000/chat -H "Content-Type: application/json" -d "{\"question\": \"What is the IET?\"}"
+```
+
+On Windows PowerShell without `curl`, use the chat UI or `test_retrieval.py` instead.
+
+### Quick reference
+
+| Service | URL | Command |
+|---------|-----|---------|
+| Backend API | http://localhost:8000 | `uvicorn app.main:app --reload` |
+| Chat UI | http://localhost:5173 | `npm run dev` (in `frontend/`) |
+| Ingestion | — | `python -m app.ingestion.ingest` |
+| Create index | — | `python scripts/create_search_index.py` |
+
+> **Azure Free tier:** Vector search works for dev workloads with a 50 MB storage limit. See [terraform/README.md](terraform/README.md#search-sku-notes) for details.
 
 ## Ingest PDF Documents
 
@@ -141,47 +221,11 @@ Moved 3 documents to loaded_docs:
   - reports/annual-report.pdf
 ```
 
-### Step 3 — Verify
-
-- Indexed PDFs appear in `data/loaded_docs/` (removed from `raw_docs/`)
-- Query the API or run the test script to confirm retrieval works
-
-```powershell
-python scripts/test_retrieval.py
-```
-
-You will be prompted to enter your question interactively.
-
 ### Ingestion notes
 
 - Only new files in `data/raw_docs/` are processed — already-loaded documents are in `data/loaded_docs/`
 - Re-ingesting a document requires moving it back to `data/raw_docs/`
 - Partial failures leave affected files in `raw_docs/` (only fully indexed documents are moved)
-
-## Run Locally
-
-Start the API server:
-
-```powershell
-uvicorn app.main:app --reload
-```
-
-Health check: `GET http://localhost:8000/health`  
-Query endpoint: `POST http://localhost:8000/query` with body `{"question": "..."}`
-
-### Test the RAG pipeline
-
-Run an end-to-end retrieval and generation test from the command line:
-
-```powershell
-python scripts/test_retrieval.py
-```
-
-When prompted, type your question and press Enter:
-
-```text
-Enter your question: What impact did Norm AI have on AI in the legal industry?
-```
 
 ## Evaluation
 

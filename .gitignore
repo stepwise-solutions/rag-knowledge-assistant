@@ -17,6 +17,12 @@ build/
 .vscode/
 .idea/
 
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.local
+
 # Data (keep structure, ignore uploaded docs)
 data/raw_docs/*
 !data/raw_docs/.gitkeep

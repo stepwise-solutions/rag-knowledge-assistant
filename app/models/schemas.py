@@ -35,6 +35,11 @@ class QueryResponse(BaseModel):
     sources: list[str]
 
 
+class ChatResponse(BaseModel):
+    answer: str
+    sources: list[str] = []
+
+
 class RetrievalError(Exception):
     """Raised when document retrieval fails."""
 
