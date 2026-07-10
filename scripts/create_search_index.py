@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 """Create the Azure AI Search index used by this RAG app.
 
-Schema matches app/ingestion/indexer.py and app/retrieval/search_service.py:
+Schema matches app/ingestion/ingest.py and app/rag/retrieval.py:
   - id             unique identifier for the chunk
   - chunk_id       chunk identifier within the source document
   - source         originating file path
   - content        searchable chunk text (BM25 / hybrid keyword leg)
   - content_vector embedding from text-embedding-3-large (3072 dims)
 
-Requires a billable Search SKU (Basic or above) for vector fields.
+Works on the Free tier for small dev workloads (50 MB storage limit).
+For production or larger document sets, use Basic or above.
 
 Environment (or .env via python-dotenv):
   AZURE_SEARCH_ENDPOINT

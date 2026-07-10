@@ -4,7 +4,7 @@ import uuid
 
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
-from app.ingestion.load_docs import Document
+from app.models.schemas import Document
 
 
 def chunk_documents(

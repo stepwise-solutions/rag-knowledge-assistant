@@ -3,8 +3,8 @@
 import json
 from pathlib import Path
 
-from app.generation.generator import create_generator
-from app.retrieval.retriever import create_retriever
+from app.rag.generation import generate_answer
+from app.rag.retrieval import retrieve_documents
 
 
 def load_dataset(path: str | Path | None = None) -> list[dict]:
@@ -17,13 +17,10 @@ def run_evaluation(dataset: list[dict] | None = None) -> list[dict]:
     examples = dataset or load_dataset()
     evaluation_results: list[dict] = []
 
-    retriever = create_retriever()
-    generator = create_generator()
-
     for example in examples:
         question = example["question"]
-        retrieval_results = retriever.retrieve(question)
-        answer = generator.generate_answer(question, retrieval_results)
+        retrieval_results = retrieve_documents(question)
+        answer = generate_answer(question, retrieval_results)
 
         evaluation_results.append(
             {
